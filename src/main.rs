@@ -1,10 +1,10 @@
 use clap::Parser;
 use std::error::Error;
 
-/// The rwc utility displays the number of words in a file. Inspired by `wc`.
+/// Displays the number of words in the specified files. Inspired by `wc`.
 #[derive(Parser)]
 struct Cli {
-    /// The path to the file to read
+    /// The path to the file(s) to read
     files: Vec<String>
 }
 

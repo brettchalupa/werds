@@ -4,7 +4,7 @@ use std::process::Command;
 
 #[test]
 fn single_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("rwc")?;
+    let mut cmd = Command::cargo_bin("werds")?;
 
     cmd.arg("tests/fixtures/haiku.txt");
     cmd.assert().success().stdout(String::from("7\n"));
@@ -14,7 +14,7 @@ fn single_file() -> Result<(), Box<dyn std::error::Error>> {
 
 #[test]
 fn medium_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("rwc")?;
+    let mut cmd = Command::cargo_bin("werds")?;
 
     cmd.arg("tests/fixtures/medium.txt");
     cmd.assert().success().stdout(String::from("8\n"));
@@ -24,7 +24,7 @@ fn medium_file() -> Result<(), Box<dyn std::error::Error>> {
 
 #[test]
 fn long_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("rwc")?;
+    let mut cmd = Command::cargo_bin("werds")?;
 
     cmd.arg("tests/fixtures/long.txt");
     cmd.assert().success().stdout(String::from("204\n"));
@@ -34,7 +34,7 @@ fn long_file() -> Result<(), Box<dyn std::error::Error>> {
 
 #[test]
 fn multiple_files() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("rwc")?;
+    let mut cmd = Command::cargo_bin("werds")?;
 
     cmd.arg("tests/fixtures/haiku.txt")
         .arg("tests/fixtures/medium.txt")
@@ -46,7 +46,7 @@ fn multiple_files() -> Result<(), Box<dyn std::error::Error>> {
 
 #[test]
 fn file_doesnt_exist() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("rwc")?;
+    let mut cmd = Command::cargo_bin("werds")?;
 
     cmd.arg("test/file/doesnt/exist");
     cmd.assert()

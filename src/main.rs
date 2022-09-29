@@ -1,5 +1,5 @@
 use clap::Parser;
-use std::error::Error;
+use std::process::ExitCode;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -8,7 +8,7 @@ struct Cli {
     files: Vec<String>
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> ExitCode {
     let args = Cli::parse();
 
     let mut summary:String = String::from("");
@@ -16,7 +16,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let file_count = args.files.len();
 
     for file in args.files {
-        let content = std::fs::read_to_string(&file)?;
+        let content;
+        match std::fs::read_to_string(&file) {
+            Ok(c) => { content = c },
+            Err(err) => { return handle_error(file, err) }
+        }
         let mut file_word_count = 0;
 
         for line in content.lines() {
@@ -40,5 +44,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     println!("{}", summary);
-    Ok(())
+    ExitCode::SUCCESS
+}
+
+fn handle_error(file:String, error:std::io::Error) -> ExitCode {
+    eprintln!("Error! {}: {}", error.to_string(), file);
+    ExitCode::FAILURE
 }

@@ -1,8 +1,8 @@
 use clap::Parser;
 use std::error::Error;
 
-/// Displays the number of words in the specified files. Inspired by `wc`.
 #[derive(Parser)]
+#[command(author, version, about, long_about = None)]
 struct Cli {
     /// The path to the file(s) to read
     files: Vec<String>

@@ -2,6 +2,8 @@
 name = "werds"
 version = "0.1.0"
 edition = "2021"
+description = "Displays the number of words in the specified file(s). Inspired by the wc Unix program."
+repository = "https://github.com/brettchalupa/werds"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

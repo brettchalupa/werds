@@ -4,7 +4,7 @@ A simple program that counts the number of words in the specified file(s).
 
 ## Intention
 
-A learning exercise in building `wc`-esque program in Rust.
+A learning exercise in building a `wc`-esque program in Rust.
 
 ## Usage
 

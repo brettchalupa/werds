@@ -25,6 +25,13 @@ tests/fixtures/medium.txt: 8
 total: 219
 ```
 
+Or pipe in data from stdin:
+
+```
+$ echo "Nothing quite like a fresh cup of tea\!" | werds
+8
+```
+
 ## Install
 
 ```

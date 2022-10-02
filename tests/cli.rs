@@ -72,13 +72,22 @@ fn stdin_with_file() -> Result<(), Box<dyn std::error::Error>> {
 fn file_doesnt_exist() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("werds")?;
 
-    cmd.arg("test/file/doesnt/exist");
+    cmd.arg("tests/file/doesnt/exist");
     cmd.assert()
         .failure()
-        .stderr(predicate::str::contains("No such file or directory"));
+        .stderr("Error! No such file or directory (os error 2): tests/file/doesnt/exist\n");
 
     Ok(())
 }
 
-// TODO: directory error
-// wc: tests/fixtures/: read: Is a directory
+#[test]
+fn file_is_directory() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("werds")?;
+
+    cmd.arg("tests/fixtures");
+    cmd.assert()
+        .failure()
+        .stderr("Error! File is directory: tests/fixtures\n");
+
+    Ok(())
+}

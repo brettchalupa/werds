@@ -51,9 +51,19 @@ fn main() -> ExitCode {
             file = String::from("stdin");
         } else {
             let content;
+
+            match std::fs::metadata(&file) {
+                Ok(md) => {
+                    if md.is_dir() {
+                        return handle_error(file, String::from("File is directory"));
+                    }
+                }
+                Err(err) => return handle_error(file, err.to_string()),
+            }
+
             match std::fs::read_to_string(&file) {
                 Ok(c) => content = c,
-                Err(err) => return handle_error(file, err),
+                Err(err) => return handle_error(file, err.to_string()),
             }
 
             for line in content.lines() {
@@ -78,7 +88,7 @@ fn main() -> ExitCode {
     ExitCode::SUCCESS
 }
 
-fn handle_error(file: String, error: std::io::Error) -> ExitCode {
-    eprintln!("Error! {}: {}", error.to_string(), file);
+fn handle_error(file: String, error_message: String) -> ExitCode {
+    eprintln!("Error! {}: {}", error_message, file);
     ExitCode::FAILURE
 }

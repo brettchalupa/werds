@@ -1,5 +1,4 @@
 use assert_cmd::Command;
-use predicates::prelude::*;
 
 #[test]
 fn single_file() -> Result<(), Box<dyn std::error::Error>> {

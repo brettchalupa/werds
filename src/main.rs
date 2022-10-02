@@ -30,58 +30,68 @@ mod tests {
     }
 }
 
+struct WordyFile {
+    path: String,
+    word_count: usize,
+}
+
 fn main() -> ExitCode {
     let args = Cli::parse();
 
-    let mut summary: String = String::from("");
-    let mut total_word_count = 0;
-    let file_count = args.files.len();
+    let mut wfiles: Vec<WordyFile> = Vec::new();
 
     for file in args.files {
-        let mut file_word_count = 0;
-        let mut file = file;
+        let mut wfile = WordyFile {
+            word_count: 0,
+            path: file.to_string(),
+        };
 
         // Read from stdin if the specified file is `-`
-        if file == "-" {
+        if wfile.path == "-" {
             for line in stdin().lines() {
-                let count = words_in_line(line.unwrap());
-                file_word_count += count;
-                total_word_count += count;
+                wfile.word_count += words_in_line(line.unwrap());
             }
-            file = String::from("stdin");
+            wfile.path = String::from("stdin");
         } else {
-            let content;
-
-            match std::fs::metadata(&file) {
+            match std::fs::metadata(&wfile.path) {
                 Ok(md) => {
                     if md.is_dir() {
-                        return handle_error(file, String::from("File is directory"));
+                        return handle_error(wfile.path, String::from("File is directory"));
                     }
                 }
-                Err(err) => return handle_error(file, err.to_string()),
+                Err(err) => return handle_error(wfile.path, err.to_string()),
             }
 
-            match std::fs::read_to_string(&file) {
+            let content;
+
+            match std::fs::read_to_string(&wfile.path) {
                 Ok(c) => content = c,
-                Err(err) => return handle_error(file, err.to_string()),
+                Err(err) => return handle_error(wfile.path, err.to_string()),
             }
 
             for line in content.lines() {
-                let count = words_in_line(line.to_owned());
-                total_word_count += count;
-                file_word_count += count;
+                wfile.word_count += words_in_line(line.to_owned());
             }
         }
 
-        if file_count > 1 {
-            summary = format!("{}{}: {}\n", summary, file, file_word_count);
-        }
+        wfiles.push(wfile);
     }
 
-    if file_count > 1 {
-        summary = format!("{}{}: {}", summary, "total", total_word_count);
+    let mut summary: String = String::from("");
+
+    if wfiles.len() > 1 {
+        for wfile in wfiles.iter() {
+            summary = format!("{}{}: {}\n", summary, wfile.path, wfile.word_count);
+        }
+
+        summary = format!(
+            "{}{}: {}",
+            summary,
+            "total",
+            wfiles.iter().fold(0, |r, s| r + s.word_count)
+        );
     } else {
-        summary = format!("{}", total_word_count);
+        summary = format!("{}", wfiles[0].word_count);
     }
 
     println!("{}", summary);

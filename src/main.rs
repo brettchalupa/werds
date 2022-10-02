@@ -45,7 +45,7 @@ fn main() -> ExitCode {
         if file == "-" {
             for line in stdin().lines() {
                 let count = words_in_line(line.unwrap());
-                file_word_count +=  count;
+                file_word_count += count;
                 total_word_count += count;
             }
             file = String::from("stdin");

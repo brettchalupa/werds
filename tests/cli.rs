@@ -61,9 +61,9 @@ fn stdin_with_file() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("-")
         .arg("tests/fixtures/haiku.txt")
         .write_stdin("Hello, world! My first name is Standard, my last name is In.\n");
-    cmd.assert()
-        .success()
-        .stdout(String::from("stdin: 12\ntests/fixtures/haiku.txt: 7\ntotal: 19\n"));
+    cmd.assert().success().stdout(String::from(
+        "stdin: 12\ntests/fixtures/haiku.txt: 7\ntotal: 19\n",
+    ));
 
     Ok(())
 }

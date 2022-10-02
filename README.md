@@ -6,6 +6,8 @@ A simple program that counts the number of words in the specified file(s).
 
 A learning exercise in building a `wc`-esque program in Rust.
 
+Attempts to follow the [Command Line Interface Guidelines (clig)](https://clig.dev) as best as possible.
+
 ## Usage
 
 A single file can be passed in:
@@ -25,11 +27,30 @@ tests/fixtures/medium.txt: 8
 total: 219
 ```
 
-Or pipe in data from stdin:
+Or pipe in data from stdin with the `-` file arg:
 
 ```
-$ echo "Nothing quite like a fresh cup of tea\!" | werds
+$ echo "Nothing quite like a fresh cup of tea\!" | werds -
 8
+```
+
+stdin can be compiled with other files:
+
+```
+$ echo "hi there" | werds - README.md
+stdin: 2
+README.md: 124
+total: 126
+```
+
+Or stdin can be used interactively with (with ^D to EOF):
+
+```
+$ werds -
+Hi there
+I just pased this in!
+^D
+7
 ```
 
 ## Install

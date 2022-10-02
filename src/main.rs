@@ -1,14 +1,15 @@
 use clap::Parser;
-use std::{process::ExitCode, io::stdin};
+use std::{io::stdin, process::ExitCode};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
+#[command(arg_required_else_help = true)]
 struct Cli {
-    /// The path to the file(s) to read
-    files: Vec<String>
+    /// The path to the file(s) to read, use - to read from stdin (can be combined with files)
+    files: Vec<String>,
 }
 
-fn words_in_line(line:String) -> usize {
+fn words_in_line(line: String) -> usize {
     if line.trim().is_empty() {
         0
     } else {
@@ -32,32 +33,38 @@ mod tests {
 fn main() -> ExitCode {
     let args = Cli::parse();
 
-    let mut summary:String = String::from("");
+    let mut summary: String = String::from("");
     let mut total_word_count = 0;
     let file_count = args.files.len();
 
-    if args.files.is_empty() {
-        for line in stdin().lines() {
-            total_word_count += words_in_line(line.unwrap());
-        }
-    } else {
-        for file in args.files {
+    for file in args.files {
+        let mut file_word_count = 0;
+        let mut file = file;
+
+        // Read from stdin if the specified file is `-`
+        if file == "-" {
+            for line in stdin().lines() {
+                let count = words_in_line(line.unwrap());
+                file_word_count +=  count;
+                total_word_count += count;
+            }
+            file = String::from("stdin");
+        } else {
             let content;
             match std::fs::read_to_string(&file) {
-                Ok(c) => { content = c },
-                Err(err) => { return handle_error(file, err) }
+                Ok(c) => content = c,
+                Err(err) => return handle_error(file, err),
             }
-            let mut file_word_count = 0;
 
             for line in content.lines() {
                 let count = words_in_line(line.to_owned());
                 total_word_count += count;
                 file_word_count += count;
             }
+        }
 
-            if file_count > 1 {
-                summary = format!("{}{}: {}\n", summary, file, file_word_count);
-            }
+        if file_count > 1 {
+            summary = format!("{}{}: {}\n", summary, file, file_word_count);
         }
     }
 
@@ -71,7 +78,7 @@ fn main() -> ExitCode {
     ExitCode::SUCCESS
 }
 
-fn handle_error(file:String, error:std::io::Error) -> ExitCode {
+fn handle_error(file: String, error: std::io::Error) -> ExitCode {
     eprintln!("Error! {}: {}", error.to_string(), file);
     ExitCode::FAILURE
 }

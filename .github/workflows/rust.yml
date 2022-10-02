@@ -30,6 +30,8 @@ jobs:
         restore-keys: ${{ runner.os }}-cargo-
     - name: Check
       run: cargo check --verbose --all
+    - name: Clippy
+      run: cargo clippy -- --verbose --no-deps -D warnings
     - name: Fmt
       run: cargo fmt --verbose --all -- --check
     - name: Build

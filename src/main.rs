@@ -62,12 +62,10 @@ fn main() -> ExitCode {
                 Err(err) => return handle_error(wfile.path, err.to_string()),
             }
 
-            let content;
-
-            match std::fs::read_to_string(&wfile.path) {
-                Ok(c) => content = c,
+            let content = match std::fs::read_to_string(&wfile.path) {
+                Ok(c) => c,
                 Err(err) => return handle_error(wfile.path, err.to_string()),
-            }
+            };
 
             for line in content.lines() {
                 wfile.word_count += words_in_line(line.to_owned());

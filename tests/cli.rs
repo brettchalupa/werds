@@ -68,6 +68,30 @@ fn stdin_with_file() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+fn single_line_count() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("werds")?;
+
+    cmd.arg("-l").arg("tests/fixtures/haiku.txt");
+    cmd.assert().success().stdout(String::from("3\n"));
+
+    Ok(())
+}
+
+#[test]
+fn multiple_files_line_count() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("werds")?;
+
+    cmd.arg("-l")
+        .arg("tests/fixtures/haiku.txt")
+        .arg("tests/fixtures/medium.txt");
+    cmd.assert().success().stdout(String::from(
+        "tests/fixtures/haiku.txt: 3\ntests/fixtures/medium.txt: 5\ntotal: 8\n",
+    ));
+
+    Ok(())
+}
+
+#[test]
 fn file_doesnt_exist() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("werds")?;
 

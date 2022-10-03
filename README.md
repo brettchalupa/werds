@@ -53,6 +53,13 @@ I just pased this in!
 7
 ```
 
+The number of lines can also be counted instead of words with the `-l` (short for `--lines`) arg:
+
+```
+$ werds -l README.md
+77
+```
+
 ## Install
 
 ```

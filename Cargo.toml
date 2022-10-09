@@ -6,6 +6,7 @@ description = "Displays the number of words in the specified file(s). Inspired b
 repository = "https://github.com/brettchalupa/werds"
 authors = ["Brett Chalupa <brettchalupa@gmail.com>"]
 license = "Unlicense"
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

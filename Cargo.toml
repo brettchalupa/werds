@@ -1,6 +1,6 @@
 [package]
 name = "werds"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 description = "Displays the number of words in the specified file(s). Inspired by the wc Unix program."
 repository = "https://github.com/brettchalupa/werds"

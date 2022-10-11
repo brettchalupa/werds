@@ -62,6 +62,14 @@ $ werds -l README.md
 
 ## Install
 
+Install [the latest version on Crates.io](https://crates.io/crates/werds) with:
+
+```
+cargo install werds
+```
+
+Or install the latest from GitHub:
+
 ```
 cargo install --git git@github.com:brettchalupa/werds.git
 ```

@@ -112,8 +112,6 @@ fn handle_error(file: String, error_message: String) -> ExitCode {
 
 #[cfg(test)]
 mod tests {
-    use std::process::ExitCode;
-
     use crate::{count_based_on_args, words_in_line};
 
     #[test]

@@ -1,5 +1,5 @@
 use clap::Parser;
-use std::{io::stdin, path::PathBuf, process::ExitCode};
+use std::{io::stdin, path::{PathBuf, Path}};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -18,16 +18,12 @@ struct WordyFile {
     line_count: usize,
 }
 
-fn main() -> ExitCode {
-    let args = Cli::parse();
-
-    let mut wfiles: Vec<WordyFile> = Vec::new();
-
-    for file in args.files {
+impl WordyFile {
+    fn from_path_buf(path_buf: PathBuf) -> Option<Self> {
         let mut wfile = WordyFile {
             word_count: 0,
             line_count: 0,
-            path: file,
+            path: path_buf,
         };
 
         // Read from stdin if the specified file is `-`
@@ -41,15 +37,18 @@ fn main() -> ExitCode {
             match std::fs::metadata(&wfile.path) {
                 Ok(md) => {
                     if md.is_dir() {
-                        return handle_error(wfile.path, String::from("File is directory"));
+                        handle_error(&wfile.path, String::from("File is directory"))
                     }
                 }
-                Err(err) => return handle_error(wfile.path, err.to_string()),
+                Err(err) => handle_error(&wfile.path, err.to_string()),
             }
 
             let content = match std::fs::read_to_string(&wfile.path) {
                 Ok(c) => c,
-                Err(err) => return handle_error(wfile.path, err.to_string()),
+                Err(err) => {
+                    handle_error(&wfile.path, err.to_string());
+                    return None;
+                }
             };
 
             for line in content.lines() {
@@ -58,7 +57,17 @@ fn main() -> ExitCode {
             }
         }
 
-        wfiles.push(wfile);
+        Some(wfile)
+    }
+}
+
+fn main() {
+    let args = Cli::parse();
+
+    let mut wfiles: Vec<WordyFile> = Vec::new();
+
+    for file in args.files {
+        wfiles.push(WordyFile::from_path_buf(file).unwrap());
     }
 
     let mut summary: String = String::from("");
@@ -86,7 +95,6 @@ fn main() -> ExitCode {
     }
 
     println!("{}", summary);
-    ExitCode::SUCCESS
 }
 
 fn words_in_line(line: String) -> usize {
@@ -105,9 +113,9 @@ fn count_based_on_args(wfile: &WordyFile, lines: bool) -> usize {
     }
 }
 
-fn handle_error(file: PathBuf, error_message: String) -> ExitCode {
+fn handle_error(file: &Path, error_message: String) {
     eprintln!("Error! {}: {}", error_message, file.to_str().unwrap());
-    ExitCode::FAILURE
+    ::std::process::exit(1);
 }
 
 #[cfg(test)]

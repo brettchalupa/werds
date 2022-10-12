@@ -1,19 +1,19 @@
 use clap::Parser;
-use std::{io::stdin, process::ExitCode};
+use std::{io::stdin, path::PathBuf, process::ExitCode};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 #[command(arg_required_else_help = true)]
 struct Cli {
     /// The path to the file(s) to read, use - to read from stdin (can be combined with files)
-    files: Vec<String>,
+    files: Vec<PathBuf>,
     /// Print the number of lines in a file instead of words
     #[arg(short, long)]
     lines: bool,
 }
 
 struct WordyFile {
-    path: String,
+    path: PathBuf,
     word_count: usize,
     line_count: usize,
 }
@@ -27,16 +27,16 @@ fn main() -> ExitCode {
         let mut wfile = WordyFile {
             word_count: 0,
             line_count: 0,
-            path: file.to_string(),
+            path: file,
         };
 
         // Read from stdin if the specified file is `-`
-        if wfile.path == "-" {
+        if wfile.path == PathBuf::from("-") {
             for line in stdin().lines() {
                 wfile.word_count += words_in_line(line.unwrap());
                 wfile.line_count += 1;
             }
-            wfile.path = String::from("stdin");
+            wfile.path = PathBuf::from("stdin");
         } else {
             match std::fs::metadata(&wfile.path) {
                 Ok(md) => {
@@ -68,7 +68,7 @@ fn main() -> ExitCode {
             summary = format!(
                 "{}{}: {}\n",
                 summary,
-                wfile.path,
+                wfile.path.to_str().unwrap(),
                 count_based_on_args(wfile, args.lines)
             );
         }
@@ -105,13 +105,15 @@ fn count_based_on_args(wfile: &WordyFile, lines: bool) -> usize {
     }
 }
 
-fn handle_error(file: String, error_message: String) -> ExitCode {
-    eprintln!("Error! {}: {}", error_message, file);
+fn handle_error(file: PathBuf, error_message: String) -> ExitCode {
+    eprintln!("Error! {}: {}", error_message, file.to_str().unwrap());
     ExitCode::FAILURE
 }
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use crate::{count_based_on_args, words_in_line};
 
     #[test]
@@ -125,7 +127,7 @@ mod tests {
     #[test]
     fn count_based_on_args_keys_off_lines_bool() {
         let wfile = crate::WordyFile {
-            path: String::from("example.txt"),
+            path: PathBuf::from("example.txt"),
             word_count: 10,
             line_count: 2,
         };

@@ -135,3 +135,9 @@ mod tests {
         assert_eq!(count_based_on_args(&wfile, true), 2);
     }
 }
+
+#[test]
+fn verify_cli() {
+    use clap::CommandFactory;
+    Cli::command().debug_assert()
+}

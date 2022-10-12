@@ -1,5 +1,9 @@
 use clap::Parser;
-use std::{io::stdin, path::PathBuf, process::ExitCode};
+use std::{
+    fs::File,
+    io::{stdin, BufRead, BufReader},
+    path::{Path, PathBuf},
+};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -18,47 +22,59 @@ struct WordyFile {
     line_count: usize,
 }
 
-fn main() -> ExitCode {
+impl WordyFile {
+    fn from_path_buf(path_buf: PathBuf) -> Option<Self> {
+        let mut wfile = WordyFile {
+            word_count: 0,
+            line_count: 0,
+            path: path_buf,
+        };
+
+        if wfile.path == PathBuf::from("-") {
+            wfile.path = PathBuf::from("stdin");
+            wfile.process_buf_reader(BufReader::new(stdin().lock()));
+        } else {
+            match std::fs::metadata(&wfile.path) {
+                Ok(md) => {
+                    if md.is_dir() {
+                        handle_error(&wfile.path, String::from("File is directory"))
+                    }
+                }
+                Err(err) => handle_error(&wfile.path, err.to_string()),
+            }
+
+            match File::open(&wfile.path) {
+                Ok(f) => wfile.process_buf_reader(BufReader::new(f)),
+                Err(err) => handle_error(&wfile.path, err.to_string()),
+            };
+        }
+
+        Some(wfile)
+    }
+
+    fn process_buf_reader<R: BufRead>(&mut self, buf_reader: R) {
+        for line in buf_reader.lines() {
+            self.word_count += words_in_line(line.unwrap());
+            self.line_count += 1;
+        }
+    }
+}
+
+fn words_in_line(line: String) -> usize {
+    if line.trim().is_empty() {
+        0
+    } else {
+        line.split(' ').count()
+    }
+}
+
+fn main() {
     let args = Cli::parse();
 
     let mut wfiles: Vec<WordyFile> = Vec::new();
 
     for file in args.files {
-        let mut wfile = WordyFile {
-            word_count: 0,
-            line_count: 0,
-            path: file,
-        };
-
-        // Read from stdin if the specified file is `-`
-        if wfile.path == PathBuf::from("-") {
-            for line in stdin().lines() {
-                wfile.word_count += words_in_line(line.unwrap());
-                wfile.line_count += 1;
-            }
-            wfile.path = PathBuf::from("stdin");
-        } else {
-            match std::fs::metadata(&wfile.path) {
-                Ok(md) => {
-                    if md.is_dir() {
-                        return handle_error(wfile.path, String::from("File is directory"));
-                    }
-                }
-                Err(err) => return handle_error(wfile.path, err.to_string()),
-            }
-
-            let content = match std::fs::read_to_string(&wfile.path) {
-                Ok(c) => c,
-                Err(err) => return handle_error(wfile.path, err.to_string()),
-            };
-
-            for line in content.lines() {
-                wfile.word_count += words_in_line(line.to_owned());
-                wfile.line_count += 1;
-            }
-        }
-
-        wfiles.push(wfile);
+        wfiles.push(WordyFile::from_path_buf(file).unwrap());
     }
 
     let mut summary: String = String::from("");
@@ -86,15 +102,6 @@ fn main() -> ExitCode {
     }
 
     println!("{}", summary);
-    ExitCode::SUCCESS
-}
-
-fn words_in_line(line: String) -> usize {
-    if line.trim().is_empty() {
-        0
-    } else {
-        line.split(' ').count()
-    }
 }
 
 fn count_based_on_args(wfile: &WordyFile, lines: bool) -> usize {
@@ -105,9 +112,9 @@ fn count_based_on_args(wfile: &WordyFile, lines: bool) -> usize {
     }
 }
 
-fn handle_error(file: PathBuf, error_message: String) -> ExitCode {
+fn handle_error(file: &Path, error_message: String) {
     eprintln!("Error! {}: {}", error_message, file.to_str().unwrap());
-    ExitCode::FAILURE
+    ::std::process::exit(1);
 }
 
 #[cfg(test)]
@@ -133,6 +140,15 @@ mod tests {
         };
         assert_eq!(count_based_on_args(&wfile, false), 10);
         assert_eq!(count_based_on_args(&wfile, true), 2);
+    }
+
+    #[test]
+    fn wordy_file_from_path_buff() {
+        let pb = PathBuf::from("tests/fixtures/haiku.txt");
+        let wfile = crate::WordyFile::from_path_buf(pb.clone()).unwrap();
+        assert_eq!(wfile.path, pb.clone());
+        assert_eq!(wfile.word_count, 7);
+        assert_eq!(wfile.line_count, 3);
     }
 }
 

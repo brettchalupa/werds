@@ -30,7 +30,7 @@ impl WordyFile {
             path: path_buf,
         };
 
-        if wfile.path == PathBuf::from("-") {
+        if wfile.path == Path::new("-") {
             wfile.path = PathBuf::from("stdin");
             wfile.process_buf_reader(BufReader::new(stdin().lock()));
         } else {
